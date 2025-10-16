@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        background-color: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" style="height: 100vh">
+      <!-- Webamp will attempt to center itself within this div -->
+    </div>
+    <script src="./webamp.bundle.min.js"></script>
+    <script>
+      const webamp = new window.Webamp({});
+      webamp.renderWhenReady(document.getElementById("app"));
+    </script>
+  </body>
+</html>
