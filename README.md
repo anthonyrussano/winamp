@@ -146,6 +146,61 @@ The Docker Compose configuration includes a health check that:
 - **Exposed Port**: `8080`
 - **Restart Policy**: `unless-stopped`
 
+## 🚢 CI/CD Pipeline
+
+This project includes automated Docker image builds and publishing to Docker Hub via GitHub Actions.
+
+### Workflow Details
+
+The **Generate Docker Image** workflow (`.github/workflows/main.yml`) automatically:
+
+- **Triggers on**:
+  - Push to `main` branch
+  - Manual workflow dispatch
+
+- **Multi-platform builds**:
+  - `linux/amd64` (x86-64)
+  - `linux/arm64` (ARM 64-bit)
+
+- **Automatic tagging strategy**:
+  - `latest` - Always points to the most recent build from main
+  - `sha-<commit>` - Tagged with the first 8 characters of the git commit SHA
+  - `<branch>` - Tagged with the sanitized branch name (e.g., `main`)
+  - `<version>` - If pushing a git tag, uses that version (e.g., `v1.0.0`)
+
+### Example Tags
+
+For a commit `abc12345` on the `main` branch:
+- `username/winamp:latest`
+- `username/winamp:sha-abc12345`
+- `username/winamp:main`
+
+For a tagged release `v1.2.3`:
+- `username/winamp:latest`
+- `username/winamp:sha-abc12345`
+- `username/winamp:v1.2.3`
+
+### Required Secrets
+
+To use the automated workflow, configure these repository secrets:
+
+- `DOCKER_USERNAME` - Your Docker Hub username
+- `DOCKER_PASSWORD` - Your Docker Hub password or access token
+
+### Running a Specific Version
+
+Pull and run a specific version:
+```bash
+# Run latest version
+docker run -p 8080:8080 <username>/winamp:latest
+
+# Run specific commit
+docker run -p 8080:8080 <username>/winamp:sha-abc12345
+
+# Run specific release
+docker run -p 8080:8080 <username>/winamp:v1.0.0
+```
+
 ## 🛠️ Development
 
 ### Adding Custom Tracks
