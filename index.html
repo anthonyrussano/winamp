@@ -14,8 +14,194 @@
     </div>
     <script src="./webamp.bundle.min.js"></script>
     <script>
-      const webamp = new window.Webamp({});
+      // Pre-configured music library with streaming sources
+      const defaultTracks = [
+        // Streaming Radio Stations
+        {
+          metaData: {
+            artist: "SomaFM",
+            title: "Groove Salad - Ambient/Downtempo"
+          },
+          url: "https://ice1.somafm.com/groovesalad-128-mp3",
+          duration: 0 // Streaming has no duration
+        },
+        {
+          metaData: {
+            artist: "SomaFM",
+            title: "Drone Zone - Ambient Space Music"
+          },
+          url: "https://ice1.somafm.com/dronezone-128-mp3",
+          duration: 0
+        },
+        {
+          metaData: {
+            artist: "SomaFM",
+            title: "Beat Blender - Electronic Mix"
+          },
+          url: "https://ice1.somafm.com/beatblender-128-mp3",
+          duration: 0
+        },
+        {
+          metaData: {
+            artist: "SomaFM",
+            title: "DEF CON Radio - Hacker/Tech Music"
+          },
+          url: "https://ice1.somafm.com/defcon-128-mp3",
+          duration: 0
+        },
+        {
+          metaData: {
+            artist: "Radio Paradise",
+            title: "Main Mix - Eclectic Music"
+          },
+          url: "https://stream.radioparadise.com/mp3-128",
+          duration: 0
+        },
+        // Sample Audio Files (using Internet Archive public domain music)
+        {
+          metaData: {
+            artist: "Kevin MacLeod",
+            title: "Cipher"
+          },
+          url: "https://archive.org/download/Kevin_MacLeod_-_Cipher/Kevin_MacLeod_-_Cipher.mp3",
+          duration: 142
+        },
+        {
+          metaData: {
+            artist: "Scott Holmes",
+            title: "Upbeat Party"
+          },
+          url: "https://archive.org/download/ScottHolmes_UpbeatParty/ScottHolmes-UpbeatParty.mp3",
+          duration: 145
+        }
+      ];
+
+      // Playlist Persistence Functions
+      const STORAGE_KEY = 'webamp_playlist';
+
+      function savePlaylist(tracks) {
+        try {
+          const playlistData = tracks.map(track => ({
+            metaData: track.metaData,
+            url: track.url,
+            duration: track.duration || 0
+          }));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(playlistData));
+          console.log('Playlist saved:', playlistData.length, 'tracks');
+        } catch (e) {
+          console.error('Failed to save playlist:', e);
+        }
+      }
+
+      function loadPlaylist() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const playlist = JSON.parse(saved);
+            console.log('Playlist loaded:', playlist.length, 'tracks');
+            return playlist;
+          }
+        } catch (e) {
+          console.error('Failed to load playlist:', e);
+        }
+        return null;
+      }
+
+      function mergePlaylist(savedPlaylist) {
+        if (!savedPlaylist || savedPlaylist.length === 0) {
+          return defaultTracks;
+        }
+
+        // Use saved playlist, but ensure default tracks are available
+        // Create a Set of saved URLs for quick lookup
+        const savedUrls = new Set(savedPlaylist.map(t => t.url));
+
+        // Add any default tracks that aren't in the saved playlist
+        const mergedTracks = [...savedPlaylist];
+        defaultTracks.forEach(track => {
+          if (!savedUrls.has(track.url)) {
+            mergedTracks.push(track);
+          }
+        });
+
+        return mergedTracks;
+      }
+
+      // Initialize Webamp with playlist persistence
+      const savedPlaylist = loadPlaylist();
+      const initialTracks = savedPlaylist ? mergePlaylist(savedPlaylist) : defaultTracks;
+
+      const webamp = new window.Webamp({
+        initialTracks: initialTracks,
+        // Enable all available features
+        availableSkins: [
+          { url: "https://cdn.webampskins.org/skins/base-2.91.wsz", name: "Base v2.91" },
+          { url: "https://cdn.webampskins.org/skins/MacOSXAqua1-5.wsz", name: "Mac OSX v1.5 (Aqua)" },
+          { url: "https://cdn.webampskins.org/skins/TopazAmp1-2.wsz", name: "TopazAmp" },
+          { url: "https://cdn.webampskins.org/skins/Vizor1-01.wsz", name: "Vizor" }
+        ]
+      });
+
+      // Setup playlist persistence event handlers
+      webamp.onTrackDidChange((track) => {
+        console.log('Track changed:', track?.metaData?.title);
+      });
+
+      webamp.onClose(() => {
+        console.log('Webamp closed');
+      });
+
+      // Save playlist periodically and on track changes
+      let saveTimeout;
+      async function scheduleSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(async () => {
+          try {
+            const tracks = await webamp.getMediaTracks();
+            if (tracks && tracks.length > 0) {
+              savePlaylist(tracks);
+            }
+          } catch (e) {
+            console.error('Failed to get tracks for saving:', e);
+          }
+        }, 1000); // Debounce saves by 1 second
+      }
+
+      // Monitor for playlist changes
+      setInterval(async () => {
+        try {
+          const currentTracks = await webamp.getMediaTracks();
+          const savedData = localStorage.getItem(STORAGE_KEY);
+          const currentJson = JSON.stringify(currentTracks?.map(t => t.url) || []);
+          const savedJson = JSON.stringify(savedData ? JSON.parse(savedData).map(t => t.url) : []);
+
+          if (currentJson !== savedJson) {
+            scheduleSave();
+          }
+        } catch (e) {
+          // Silently handle errors during monitoring
+        }
+      }, 5000); // Check every 5 seconds
+
+      // Save playlist before page unload
+      window.addEventListener('beforeunload', async (e) => {
+        try {
+          const tracks = await webamp.getMediaTracks();
+          if (tracks && tracks.length > 0) {
+            savePlaylist(tracks);
+          }
+        } catch (e) {
+          console.error('Failed to save on unload:', e);
+        }
+      });
+
+      // Render Webamp
       webamp.renderWhenReady(document.getElementById("app"));
+
+      // Log initialization info
+      console.log('Webamp initialized with', initialTracks.length, 'tracks');
+      console.log('Streaming sources:', initialTracks.filter(t => t.duration === 0).length);
+      console.log('Audio files:', initialTracks.filter(t => t.duration > 0).length);
     </script>
   </body>
 </html>
