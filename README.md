@@ -7,6 +7,10 @@ A nostalgic web-based implementation of the classic Winamp media player, powered
 - **Classic Winamp Interface**: Authentic recreation of the legendary Winamp 2.9 UI
 - **Browser-Based**: No installation required - runs entirely in your web browser
 - **Fully Functional**: Play audio files, manage playlists, and enjoy visualizations
+- **Pre-configured Music Library**: Starts with 7 pre-loaded tracks including streaming radio
+- **Streaming Audio**: Built-in support for internet radio stations (SomaFM, Radio Paradise)
+- **Playlist Persistence**: Automatically saves and restores your playlist using localStorage
+- **Multiple Skins**: Choose from 4 pre-configured Winamp skins
 - **Lightweight**: Minimal server footprint with Python HTTP server
 - **Docker Support**: Easy deployment with Docker and Docker Compose
 - **Responsive**: Works across modern browsers
@@ -125,10 +129,33 @@ Available configuration options include:
 Once the application is running:
 
 1. **Load Audio**: Drag and drop audio files onto the player or use the playlist editor
-2. **Visualizations**: Click the visualization area to cycle through different effects
-3. **Equalizer**: Open the equalizer window for audio adjustments
-4. **Playlist**: Manage your music queue with the playlist editor
-5. **Skins**: Change the appearance (if additional skins are configured)
+2. **Pre-loaded Content**: The player starts with 7 tracks including streaming radio stations
+3. **Streaming Radio**: Play live internet radio from SomaFM and Radio Paradise
+4. **Visualizations**: Click the visualization area to cycle through different effects
+5. **Equalizer**: Open the equalizer window for audio adjustments
+6. **Playlist**: Manage your music queue with the playlist editor
+7. **Skins**: Change the appearance from 4 available skins (right-click → Skins)
+8. **Auto-Save**: Your playlist is automatically saved and restored on page reload
+
+### 📻 Pre-configured Streaming Stations
+
+The player includes these streaming radio stations:
+
+- **SomaFM Groove Salad** - Ambient/Downtempo
+- **SomaFM Drone Zone** - Ambient Space Music
+- **SomaFM Beat Blender** - Electronic Mix
+- **SomaFM DEF CON Radio** - Hacker/Tech Music
+- **Radio Paradise Main Mix** - Eclectic Music
+
+Plus 2 sample audio tracks from the Internet Archive.
+
+### 💾 Playlist Persistence
+
+Your playlist is automatically saved:
+- **Auto-save**: Saves every 5 seconds when changes are detected
+- **Manual save**: Saves when you close the browser tab
+- **Smart merge**: Combines saved playlists with default tracks
+- **Local storage**: Uses browser localStorage (no server required)
 
 ## 🐳 Docker Details
 
@@ -205,19 +232,32 @@ docker run -p 8080:8080 <username>/winamp:v1.0.0
 
 ### Adding Custom Tracks
 
-To pre-load tracks, modify `index.html`:
+The player comes pre-configured with streaming radio and sample tracks. To add your own tracks, modify the `defaultTracks` array in `index.html`:
+
 ```javascript
-const webamp = new window.Webamp({
-  initialTracks: [
-    {
-      metaData: {
-        artist: "Artist Name",
-        title: "Track Title"
-      },
-      url: "path/to/audio.mp3"
-    }
-  ]
-});
+const defaultTracks = [
+  {
+    metaData: {
+      artist: "Artist Name",
+      title: "Track Title"
+    },
+    url: "https://example.com/audio.mp3",
+    duration: 180 // Duration in seconds, or 0 for streaming
+  },
+  // Add more tracks here...
+];
+```
+
+**For streaming sources**, set `duration: 0`:
+```javascript
+{
+  metaData: {
+    artist: "Radio Station",
+    title: "Station Name"
+  },
+  url: "https://example.com/stream.mp3",
+  duration: 0
+}
 ```
 
 ### Customizing the UI
@@ -261,12 +301,18 @@ If you encounter any issues or have questions:
 
 ## 🎯 Roadmap
 
+Completed features:
+- [x] Pre-configured music library with 7 default tracks
+- [x] Streaming audio source integration (SomaFM, Radio Paradise)
+- [x] Playlist persistence using localStorage
+- [x] Support for multiple Webamp skins (4 skins included)
+
 Potential future enhancements:
-- [ ] Add pre-configured music library
-- [ ] Support for additional Webamp skins
-- [ ] Streaming audio source integration
-- [ ] Playlist persistence
 - [ ] Mobile-optimized interface
+- [ ] Backend music library server
+- [ ] User authentication and cloud playlist sync
+- [ ] Advanced audio effects and DSP
+- [ ] Podcast RSS feed integration
 
 ---
 
