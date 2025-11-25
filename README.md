@@ -7,7 +7,7 @@ A nostalgic web-based implementation of the classic Winamp media player, powered
 - **Classic Winamp Interface**: Authentic recreation of the legendary Winamp 2.9 UI
 - **Browser-Based**: No installation required - runs entirely in your web browser
 - **Fully Functional**: Play audio files, manage playlists, and enjoy visualizations
-- **Pre-configured Music Library**: Starts with 7 pre-loaded tracks including streaming radio
+- **Pre-configured Music Library**: Starts with 5 pre-loaded streaming radio stations
 - **Streaming Audio**: Built-in support for internet radio stations (SomaFM, Radio Paradise)
 - **Playlist Persistence**: Automatically saves and restores your playlist using localStorage
 - **Multiple Skins**: Choose from 4 pre-configured Winamp skins
@@ -129,7 +129,7 @@ Available configuration options include:
 Once the application is running:
 
 1. **Load Audio**: Drag and drop audio files onto the player or use the playlist editor
-2. **Pre-loaded Content**: The player starts with 7 tracks including streaming radio stations
+2. **Pre-loaded Content**: The player starts with 5 streaming radio stations
 3. **Streaming Radio**: Play live internet radio from SomaFM and Radio Paradise
 4. **Visualizations**: Click the visualization area to cycle through different effects
 5. **Equalizer**: Open the equalizer window for audio adjustments
@@ -147,7 +147,7 @@ The player includes these streaming radio stations:
 - **SomaFM DEF CON Radio** - Hacker/Tech Music
 - **Radio Paradise Main Mix** - Eclectic Music
 
-Plus 2 sample audio tracks from the Internet Archive.
+**Note:** To add your own music files, see the Development section below.
 
 ### 💾 Playlist Persistence
 
@@ -232,23 +232,49 @@ docker run -p 8080:8080 <username>/winamp:v1.0.0
 
 ### Adding Custom Tracks
 
-The player comes pre-configured with streaming radio and sample tracks. To add your own tracks, modify the `defaultTracks` array in `index.html`:
+The player comes pre-configured with 5 streaming radio stations. To add your own music files, you have several options:
+
+#### **Option 1: Host Local Files** (Recommended - No CORS issues)
+1. Create a `music` directory in the project
+2. Add your MP3 files to it
+3. Update `defaultTracks` in `index.html`:
 
 ```javascript
 const defaultTracks = [
+  // ...existing streaming stations...
   {
     metaData: {
-      artist: "Artist Name",
-      title: "Track Title"
+      artist: "Your Artist",
+      title: "Your Track"
     },
-    url: "https://example.com/audio.mp3",
-    duration: 180 // Duration in seconds, or 0 for streaming
-  },
-  // Add more tracks here...
+    url: "./music/your-song.mp3",
+    duration: 180 // Duration in seconds
+  }
 ];
 ```
 
-**For streaming sources**, set `duration: 0`:
+#### **Option 2: Use External URLs** (Must be CORS-enabled)
+For external URLs, the server must have proper CORS headers. Test with your browser's console:
+
+```javascript
+{
+  metaData: {
+    artist: "Artist Name",
+    title: "Track Title"
+  },
+  url: "https://example.com/audio.mp3",
+  duration: 180
+}
+```
+
+**CORS Requirements:**
+- The audio server must send `Access-Control-Allow-Origin: *` header
+- GitHub raw URLs work: `https://raw.githubusercontent.com/user/repo/branch/file.mp3`
+- jsDelivr CDN works: `https://cdn.jsdelivr.net/gh/user/repo@version/file.mp3`
+
+#### **Option 3: Add More Streaming Sources**
+For internet radio streams, set `duration: 0`:
+
 ```javascript
 {
   metaData: {
@@ -259,6 +285,8 @@ const defaultTracks = [
   duration: 0
 }
 ```
+
+**Note:** Due to CORS restrictions, many external MP3 URLs won't work. Hosting files locally (Option 1) is the most reliable approach.
 
 ### Customizing the UI
 
@@ -302,10 +330,11 @@ If you encounter any issues or have questions:
 ## 🎯 Roadmap
 
 Completed features:
-- [x] Pre-configured music library with 7 default tracks
+- [x] Pre-configured music library with 5 streaming radio stations
 - [x] Streaming audio source integration (SomaFM, Radio Paradise)
 - [x] Playlist persistence using localStorage
 - [x] Support for multiple Webamp skins (4 skins included)
+- [x] Comprehensive documentation for adding local and remote audio files
 
 Potential future enhancements:
 - [ ] Mobile-optimized interface

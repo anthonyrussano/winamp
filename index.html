@@ -57,23 +57,21 @@
           url: "https://stream.radioparadise.com/mp3-128",
           duration: 0
         },
-        // Sample Audio Files (using Internet Archive public domain music)
-        {
-          metaData: {
-            artist: "Kevin MacLeod",
-            title: "Cipher"
-          },
-          url: "https://archive.org/download/Kevin_MacLeod_-_Cipher/Kevin_MacLeod_-_Cipher.mp3",
-          duration: 142
-        },
-        {
-          metaData: {
-            artist: "Scott Holmes",
-            title: "Upbeat Party"
-          },
-          url: "https://archive.org/download/ScottHolmes_UpbeatParty/ScottHolmes-UpbeatParty.mp3",
-          duration: 145
-        }
+        // Sample Audio Files
+        // NOTE: For production use, either:
+        // 1. Host your own MP3 files in this directory and use relative URLs (e.g., "./music/song.mp3")
+        // 2. Use URLs from CORS-enabled sources (test with your browser's console)
+        // 3. The streaming stations above work out of the box
+        //
+        // Example with local files:
+        // {
+        //   metaData: {
+        //     artist: "Your Artist",
+        //     title: "Your Track"
+        //   },
+        //   url: "./music/your-track.mp3",
+        //   duration: 180
+        // }
       ];
 
       // Playlist Persistence Functions
